@@ -39,3 +39,30 @@ const roles=[
     roles.forEach((r)=>{
         console.log(r.name)
     })
+
+
+// Creating Promises
+
+function getData(user_id){
+    return new Promise((resolve,reject)=>{
+        const users={1:"Alice",2:"Bob",3:"Charlie"}
+        
+        setTimeout(()=>{
+            if(user_id in users){
+                resolve({user_id:user_id,name:users[user_id]})
+            }else{
+                reject("Invalid user ID")
+            }
+        },1000)
+    })
+}
+
+async function fetchData(id){
+
+        getData(id).then((data)=>console.log(data))
+        .catch((err)=>console.log(err))  
+    
+
+}
+
+fetchData(4)
