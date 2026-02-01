@@ -4,7 +4,7 @@ const fastify = require('fastify')({
 })
 const pool=require('./db/pool.js')
 const fastifyStatic = require('@fastify/static')
-
+const bcryptjs=require('bcryptjs');
 
 // Register fastify-static to serve static files (to use public static)
 const path = require('path');
@@ -20,9 +20,10 @@ fastify.register(fastifyStatic, {
   prefix: '/public/',
 });
 
+fastify.register(require('@fastify/formbody'));
 // Serve index.html at root
 fastify.get('/', (request, reply) => {
-  reply.view('login.ejs',{currentUser:"daniel"}); // index.html must be in the 'public' directory
+  return reply.view('login.ejs',{currentUser:"daniel"}); // index.html must be in the 'public' directory
 });
 
 fastify.get('/users', async(request, reply) => {
@@ -36,6 +37,31 @@ const roles=await pool.query('SELECT * FROM roles')
     return reply.status(500).send('Server Error')
   }
 })
+
+//submit users
+
+ // Handle form POST
+  fastify.post('/users/create', async (req, reply) => {
+    const { user_name, passwords, role_id } = req.body;
+    console.log(req.body);
+   
+
+    try {
+       let roleid =Number(role_id);
+       //hash password
+       const saltRounds=10;
+       const hashedPassword=await bcryptjs.hash(passwords,saltRounds);
+        await pool.query(
+            "INSERT INTO users (user_name, passwords, role_id) VALUES ($1, $2, $3)",
+            [user_name, hashedPassword, roleid]
+        );
+
+        return reply.send({ success: true, message: "User created" });
+
+    } catch (err) {
+        return reply.send({ success: false, message: err.message });
+    }
+});
 
 // Run the server!
 fastify.listen({ port: 3000 }, (err, address) => {
