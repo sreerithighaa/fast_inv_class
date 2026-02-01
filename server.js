@@ -6,7 +6,7 @@ const pool=require('./db/pool.js')
 const fastifyStatic = require('@fastify/static')
 
 
-// Register fastify-static to serve static files
+// Register fastify-static to serve static files (to use public static)
 const path = require('path');
 
 //registger view engine
